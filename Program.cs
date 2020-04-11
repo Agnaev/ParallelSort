@@ -9,32 +9,24 @@ namespace Parallel
 {
     class Program
     {
-        public class SortElement : IComparable<SortElement>
+        public class SortElement : IComparable
         {
-            public SortElement(int num)
+            public double SortNumber { get; private set; }
+            
+            public SortElement(double num)
             {
-                SortNumber = num;
+                this.SortNumber = num;
             }
-
-            public int SortNumber { get; private set; }
-            public int CompareTo(SortElement el)//(object obj)
+            public int CompareTo(object el)
             {
-                //var other = el as SortElement ?? new SortElement(this.SortNumber);
-
-                if (SortNumber > el.SortNumber) return -1;
-                if (SortNumber == el.SortNumber) return 0;
-                return 1;
-            }
-
-            public static void Print(SortElement el)
-            {
-                Console.Write(el.SortNumber + " ");
+                SortElement other = el as SortElement;
+                return this.SortNumber.CompareTo(other.SortNumber);
             }
         }
 
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
+            Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.RealTime;
 
             ParallelSort();
             
@@ -50,13 +42,13 @@ namespace Parallel
             int.TryParse(Console.ReadLine(), out int threadsCount);
             
             Random rand = new Random(DateTime.Now.Second * DateTime.Now.Minute);
-            double[] sortingArray = new double[count];
+            SortElement[] sortingArray = new SortElement[count];
             for (int i = 0; i < count; i++)
             {
-                sortingArray[i] = rand.NextDouble() * 100;
+                sortingArray[i] = new SortElement(rand.NextDouble() * 100);
             }
             
-            Sort sort = new Sort(sortingArray);
+            Sort<SortElement> sort = new Sort<SortElement>(sortingArray);
 
             double parallelTime = sort.RunParallelSort(threadsCount);
             double sequentialTime = sort.RunMergeSort();
@@ -64,7 +56,8 @@ namespace Parallel
             int errors = 0;
             for (int i = 1; i < sort.Array.Length; i++)
             {
-                if(sort.Array[i - 1] > sort.Array[i])
+                //if(sort.Array[i - 1] > sort.Array[i])
+                if(sort.Array[i - 1].CompareTo(sort.Array[i]) == 1)
                 {
                     ++errors;
                 }

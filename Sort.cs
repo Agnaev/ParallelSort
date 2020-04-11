@@ -7,26 +7,27 @@ using System.Diagnostics;
 
 namespace Parallel
 {
-    public class Sort
+    public class Sort<T> where T : IComparable
     {
-        public double[] SourceArray { get; private set; }
-        public  double[] Array { get; private set; }
+        public T[] SourceArray { get; private set; }
+        public  T[] Array { get; private set; }
         private List<Thread> Threads { get; set; } = new List<Thread>();
         public Stopwatch ParallelTime { get; private set; } = new Stopwatch();
         public Stopwatch SequentialTime { get; private set; } = new Stopwatch();
 
-        private void MergeInPlace(double[] a, int left, int middle, int high)
+        private void MergeInPlace(T[] a, int left, int middle, int high)
         {
             int right = middle + 1;
             while (left <= middle && right <= high)
             {
-                if (a[left] <= a[right])
+                //if(a[left] <= a[right])
+                if (a[left].CompareTo(a[right]) <= 0)
                 {
                     left++;
                 }
                 else
                 {
-                    double temp = a[right];
+                    T temp = a[right];
                     System.Array.Copy(a, left, a, left + 1, right - left);
                     a[left] = temp;
                     left++;
@@ -41,7 +42,7 @@ namespace Parallel
             this.Threads.Add(new Thread(() => MergeSort(this.Array, left, right)));
         }
 
-        private void MergeSort(double[] a, int left, int right)
+        private void MergeSort(T[] a, int left, int right)
         {
             if (right > left)
             {
@@ -54,7 +55,7 @@ namespace Parallel
 
         public double RunMergeSort()
         {
-            this.Array = this.SourceArray.Clone() as double[];
+            this.Array = this.SourceArray.Clone() as T[];
             SequentialTime.Start();
             MergeSort(Array, 0, Array.Length - 1);
             SequentialTime.Stop();
@@ -81,10 +82,10 @@ namespace Parallel
             return ParallelTime.ElapsedMilliseconds / 1e3;
         }
 
-        public Sort(double[] Array)
+        public Sort(T[] Array)
         {
             this.Array = Array;
-            this.SourceArray = this.Array.Clone() as double[];
+            this.SourceArray = this.Array.Clone() as T[];
         }
     }
 }
