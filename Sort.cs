@@ -64,7 +64,9 @@ namespace Parallel
 
         public double RunParallelSort(int threadsCount)
         {
-            int end, begin = 0;
+            this.Array = this.SourceArray.Clone() as T[];
+            int end;
+            int begin = 0;
             for (int i = 0; i < threadsCount; i++)
             {
                 end = (i + 1) * this.Array.Length / threadsCount + (i == threadsCount - 1 ? -1 : 0);
